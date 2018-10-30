@@ -38,12 +38,27 @@ namespace SeqLib {
      * @param file Path to an indexed reference genome. See samtools faidx to create
      * @return True if succesfully loaded
      */
-    bool LoadIndex(const std::string& file);
-    
+    bool LoadIndex(const std::string& file, bool createIfNecessary=true);
+
+    /** Return the number of sequences store in this dictionary
+     * Returns 0 if reference has not been loaded
+     */
+    int NumSequences() const;
+
+    /** Return the length of the sequence */
+    int GetSequenceLength(const std::string& id) const;
+
+    /** Return the name of the sequence */
+    std::string GetSequenceName(int id) const;
+
     /** Check if reference has been loaded */
     bool IsEmpty() const { 
       return (index == NULL); 
     }
+
+    /** Get the raw faidx_t pointer */
+    const faidx_t *get() const { return index; }
+    faidx_t *get() { return index; }
     
   private:
 

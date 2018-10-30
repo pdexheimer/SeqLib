@@ -5,7 +5,7 @@
 
 namespace SeqLib {
 
-  bool RefGenome::LoadIndex(const std::string& file) {
+  bool RefGenome::LoadIndex(const std::string& file, bool createIfNecessary) {
 
     // clear the old one
     if (index)  
@@ -20,7 +20,8 @@ namespace SeqLib {
     }
     
     // load it in
-    index = fai_load(file.c_str());
+    int flags = createIfNecessary ? FAI_CREATE : 0;
+    index = fai_load3(file.c_str(), NULL, NULL, flags);
 
     if (!index)
       return false;
@@ -56,6 +57,29 @@ namespace SeqLib {
 
     return (out);
 
+  }
+
+  int RefGenome::NumSequences() const {
+    if (IsEmpty())
+      return 0;
+    return faidx_nseq(index);
+  }
+
+  int RefGenome::GetSequenceLength(const std::string &id) const {
+    if (IsEmpty())
+      return -1;
+    return faidx_seq_len(index, id.c_str());
+  }
+
+  std::string RefGenome::GetSequenceName(int id) const {
+    if (IsEmpty())
+      throw new std::invalid_argument("RefGenome::GetSequenceName - index not loaded");
+    if (id < 0)
+      throw new std::invalid_argument("RefGenome::GetSequenceName - id must be >= 0");
+    if (id >= NumSequences())
+      throw new std::invalid_argument("RefGenome::GetSequenceName - requested id is higher than the number of sequences");
+    
+    return std::string(faidx_iseq(index, id));
   }
 
 }
